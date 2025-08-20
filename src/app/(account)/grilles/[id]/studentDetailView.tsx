@@ -14,12 +14,219 @@ type Notes = {
   [elementId: number]: number;
 };
 
+// Type pour la modal d'édition des notes
+type EditNoteModalProps = {
+  isOpen: boolean;
+  element: any;
+  noteInfo: {
+    id: number;
+    date_created: string;
+    cmi: number;
+    examen: number;
+    rattrapage: number;
+  } | null;
+  onClose: () => void;
+  onSave: (elementId: number, cmi: number, examen: number, rattrapage: number, password: string) => void;
+};
+
+// Modal pour éditer les notes
+function EditNoteModal({ isOpen, element, noteInfo, onClose, onSave }: EditNoteModalProps) {
+  const [cmi, setCmi] = useState(0);
+  const [examen, setExamen] = useState(0);
+  const [rattrapage, setRattrapage] = useState(0);
+  const [password, setPassword] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (noteInfo) {
+      setCmi(noteInfo.cmi);
+      setExamen(noteInfo.examen);
+      setRattrapage(noteInfo.rattrapage);
+    } else {
+      setCmi(0);
+      setExamen(0);
+      setRattrapage(0);
+    }
+    setPassword('');
+  }, [noteInfo, isOpen]);
+
+  const handleSave = async () => {
+    if (!password.trim()) {
+      alert('Veuillez saisir le mot de passe de délibération');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await onSave(element.id, cmi, examen, rattrapage, password);
+      onClose();
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const totalPrincipal = cmi + examen;
+  const noteFinale = Math.max(totalPrincipal, rattrapage);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Modifier les notes
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 py-4 space-y-4">
+          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+              {element?.designation || `Élément ${element?.id}`}
+            </h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {element?.credit} crédit{element?.credit > 1 ? 's' : ''}
+            </p>
+          </div>
+
+          {/* Notes CMI */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Note CMI (Contrôle continu)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="20"
+              step="0.5"
+              value={cmi}
+              onChange={(e) => setCmi(parseFloat(e.target.value) || 0)}
+              className="w-full py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+              placeholder="Note sur 20"
+            />
+          </div>
+
+          {/* Notes Examen */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Note Examen
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="20"
+              step="0.5"
+              value={examen}
+              onChange={(e) => setExamen(parseFloat(e.target.value) || 0)}
+              className="w-full py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+              placeholder="Note sur 20"
+            />
+          </div>
+
+          {/* Notes Rattrapage */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Note Rattrapage
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="20"
+              step="0.5"
+              value={rattrapage}
+              onChange={(e) => setRattrapage(parseFloat(e.target.value) || 0)}
+              className="w-full py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+              placeholder="Note sur 20"
+            />
+          </div>
+
+          {/* Calcul automatique */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Total principal (CMI + Examen):</span>
+              <span className="font-medium">{totalPrincipal.toFixed(2)}/20</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Note rattrapage:</span>
+              <span className="font-medium">{rattrapage.toFixed(2)}/20</span>
+            </div>
+            <div className="flex justify-between text-sm font-bold border-t border-blue-200 dark:border-blue-800 pt-2 mt-2">
+              <span className="text-gray-900 dark:text-white">Note finale:</span>
+              <span className={`${noteFinale >= 10 ? 'text-green-600' : 'text-red-600'}`}>
+                {noteFinale.toFixed(2)}/20
+              </span>
+            </div>
+          </div>
+
+          {/* Mot de passe de délibération */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Mot de passe de délibération *
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white"
+              placeholder="Saisissez le mot de passe"
+              required
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+          >
+            Annuler
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !password.trim()}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+          >
+            {isSaving ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Enregistrement...
+              </>
+            ) : (
+              'Enregistrer'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function StudentDetailView({ student, unites, onBack }: StudentDetailViewProps) {
   const [expandedUnites, setExpandedUnites] = useState<number[]>([]);
   const [notes, setNotes] = useState<Notes>({});
   const [isSaving, setIsSaving] = useState(false);
   const [notesInfo, setNotesInfo] = useState<{ [elementId: number]: { date_created: string; cmi: number; examen: number; rattrapage: number; id: number } | null }>({});
   const [loading, setLoading] = useState(true);
+  
+  // États pour la modal d'édition
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<any>(null);
 
   const fetchNote = async ({
     id_etudiant,
@@ -166,6 +373,12 @@ export default function StudentDetailView({ student, unites, onBack }: StudentDe
     );
   };
 
+  // Ouvrir la modal d'édition
+  const openEditModal = (element: any) => {
+    setSelectedElement(element);
+    setEditModalOpen(true);
+  };
+
   // Mise à jour d'une note
   const updateNote = (elementId: number, value: number) => {
     const clampedValue = Math.min(20, Math.max(0, value));
@@ -196,6 +409,49 @@ export default function StudentDetailView({ student, unites, onBack }: StudentDe
       console.error('Erreur lors de la sauvegarde des notes:', error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Sauvegarder les notes depuis la modal
+  const handleSaveNote = async (elementId: number, cmi: number, examen: number, rattrapage: number, password: string) => {
+    try {
+      // Ici tu peux ajouter la logique d'API pour sauvegarder avec le mot de passe
+      console.log('Sauvegarde note:', {
+        elementId,
+        cmi,
+        examen,
+        rattrapage,
+        password,
+        studentId: student.id_etudiant
+      });
+
+      // Mettre à jour les notes localement
+      const totalPrincipal = cmi + examen;
+      const noteFinale = Math.max(totalPrincipal, rattrapage);
+
+      setNotes(prev => ({
+        ...prev,
+        [elementId]: noteFinale
+      }));
+
+      setNotesInfo(prev => ({
+        ...prev,
+        [elementId]: {
+          ...(prev[elementId] || { id: 0, date_created: new Date().toISOString() }),
+          cmi,
+          examen,
+          rattrapage
+        }
+      }));
+
+      // Ici tu peux appeler ton API
+      // await titulaireApi.saveNote({ ... });
+
+      alert('Note sauvegardée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde');
+      throw error;
     }
   };
 
@@ -243,28 +499,6 @@ export default function StudentDetailView({ student, unites, onBack }: StudentDe
             Résultats de {student.nom}
           </h1>
         </div>
-        <button
-          onClick={handleSaveNotes}
-          disabled={isSaving}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
-        >
-          {isSaving ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Enregistrement...
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="-ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Enregistrer les notes
-            </>
-          )}
-        </button>
       </div>
 
       {loading ? (
@@ -428,24 +662,34 @@ export default function StudentDetailView({ student, unites, onBack }: StudentDe
                                       {element.credit} crédit{element.credit > 1 ? 's' : ''}
                                     </p>
                                   </div>
-                                  <div className="flex items-center">
-                                    <input
-                                      type="number"
-                                      min="0"
-                                      max="20"
-                                      step="0.5"
-                                      value={notes[element.id] || 0}
-                                      onChange={(e) => updateNote(element.id, parseFloat(e.target.value))}
-                                      className="w-16 py-1 px-2 border border-gray-300 dark:border-gray-600 rounded-md text-center focus:outline-none focus:ring-primary focus:border-primary text-sm dark:bg-gray-700 dark:text-white"
-                                    />
-                                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">/20</span>
-                                    <span className={`ml-4 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                  <div className="flex items-center space-x-3">
+                                    {/* Affichage de la note */}
+                                    <div className="text-center">
+                                      <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                        {(notes[element.id] || 0).toFixed(2)}
+                                      </span>
+                                      <span className="text-sm text-gray-500 dark:text-gray-400">/20</span>
+                                    </div>
+
+                                    {/* Badge de réussite */}
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                                       (notes[element.id] || 0) >= 10 
                                         ? 'bg-green-100 text-green-800 dark:bg-green-800/20 dark:text-green-300' 
                                         : 'bg-red-100 text-red-800 dark:bg-red-800/20 dark:text-red-300'
                                     }`}>
                                       {(notes[element.id] || 0) >= 10 ? 'Réussi' : 'Échoué'}
                                     </span>
+
+                                    {/* Bouton modifier */}
+                                    <button
+                                      onClick={() => openEditModal(element)}
+                                      className="inline-flex items-center px-3 py-1 border border-primary text-sm font-medium rounded-md text-primary bg-white hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                      Modifier
+                                    </button>
                                   </div>
                                 </div>
                               ))}
@@ -465,6 +709,18 @@ export default function StudentDetailView({ student, unites, onBack }: StudentDe
           </div>
         </div>
       )}
+
+      {/* Modal d'édition des notes */}
+      <EditNoteModal
+        isOpen={editModalOpen}
+        element={selectedElement}
+        noteInfo={selectedElement ? notesInfo[selectedElement.id] : null}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedElement(null);
+        }}
+        onSave={handleSaveNote}
+      />
     </div>
   );
 }
