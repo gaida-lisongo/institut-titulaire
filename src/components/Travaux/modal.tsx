@@ -66,13 +66,15 @@ const EtudiantsTravail = ({ travailId, travailTitre, isOpen, onClose }: Etudiant
         value: newValue
       });
       
-      if (response.ok) {
+      if (response) {
         // Mettre à jour l'état local
-        setEtudiants(prev => prev.map(etudiant => 
-          etudiant.id === etudiantId 
-            ? { ...etudiant, [fieldName]: newValue }
-            : etudiant
-        ));
+        setEtudiants((prev) =>
+          prev.map((etudiant) =>
+            etudiant.id === etudiantId
+              ? { ...etudiant, [fieldName]: newValue }
+              : etudiant,
+          ),
+        );
         console.log(`Champ ${fieldName} mis à jour avec succès`);
       } else {
         console.error(`Erreur lors de la mise à jour du champ ${fieldName}`);

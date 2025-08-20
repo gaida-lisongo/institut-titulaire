@@ -449,7 +449,7 @@ class Titulaire {
                 },
                 body: JSON.stringify({ col, value })
             });
-            return result;
+            return await result.json();
         } catch (error) {
             console.error("Error updating seance:", error);
             return {

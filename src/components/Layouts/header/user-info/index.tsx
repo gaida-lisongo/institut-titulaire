@@ -12,9 +12,18 @@ import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { LogOutIcon, SettingsIcon, UserIcon } from "./icons";
 
+interface User {
+  photo: string;
+  matricule: string;
+  nom: string;
+  post_nom: string;
+  prenom: string;
+  solde?: number;
+}
+
 export function UserInfo() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -24,9 +33,7 @@ export function UserInfo() {
   }, []);
 
   if (!user) {
-    return (
-      <div>Loading...</div>
-    ); // or a loading state
+    return <div>Loading...</div>; // or a loading state
   }
   const USER = user || {
     name: "John Smith",
@@ -84,7 +91,9 @@ export function UserInfo() {
               {USER.nom} {USER.post_nom} {USER.prenom}
             </div>
 
-            <div className="leading-none text-gray-6">{ USER.solde ?? 0.0 } CDF</div>
+            <div className="leading-none text-gray-6">
+              {USER.solde ?? 0.0} CDF
+            </div>
           </figcaption>
         </figure>
 
@@ -108,9 +117,7 @@ export function UserInfo() {
           >
             <SettingsIcon />
 
-            <span className="mr-auto text-base font-medium">
-              Compte
-            </span>
+            <span className="mr-auto text-base font-medium">Compte</span>
           </Link>
         </div>
 
@@ -120,7 +127,7 @@ export function UserInfo() {
           <button
             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
             onClick={() => {
-              setIsOpen(false)
+              setIsOpen(false);
               localStorage.removeItem("token");
               localStorage.removeItem("user");
               window.location.href = "/login";

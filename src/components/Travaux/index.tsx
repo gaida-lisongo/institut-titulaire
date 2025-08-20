@@ -10,7 +10,7 @@ type Travail = {
   description: string;
   date_fin: string;
   ponderation: number;
-  statut: "À faire" | "En cours" | "Terminé";
+  statut: "OK" | "PENDING" | "NO" | "À faire" | "En cours" | "Terminé";
   url?: string;
   id_charge?: number;
   type?: string;

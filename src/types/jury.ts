@@ -32,22 +32,27 @@ type Promotions = [{
 }];
 
 type Student = {
-    id: number;
-    id_etudiant: number;
-    date_created: string;
-    id_annee: number;
-    intitule: string;
-    id_section: number;
-    id_semestre: number;
-    nom: string;
-    matricule: string;
-    sexe: string;
-    grade: string;
-    nationalite: string;
-    date_naissance: string | null;
-    telephone: string;
-    photo: string | null;
-    adresse: string | null;
+  id: number;
+  id_etudiant: number;
+  date_created: string;
+  id_annee: number;
+  intitule: string;
+  id_section: number;
+  id_semestre: number;
+  nom: string;
+  prenom: string | null;
+  matricule: string;
+  sexe: string;
+  grade: string;
+  nationalite: string;
+  date_naissance: string | null;
+  telephone: string;
+  photo: string | null;
+  adresse: string | null;
+  cmi?: string | number | null;
+  examen?: string | number | null;
+  rattrapage?: string | number | null;
+  e_mail?: string | null;
 };
 
 export type { Element, Unite, Semestre, Promotions, Student };

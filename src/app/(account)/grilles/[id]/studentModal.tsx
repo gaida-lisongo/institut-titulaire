@@ -175,6 +175,7 @@ export default function StudentModal({ student, unites, onClose }: StudentModalP
 
   // Mise à jour d'une note
   const updateNote = (elementId: number, value: number) => {
+    console.log(`Mise à jour de la note pour l'élément ${elementId}: ${value}`);
     // Limiter les valeurs entre 0 et 20
     const clampedValue = Math.min(20, Math.max(0, value));
     setNotes(prev => ({
