@@ -521,6 +521,50 @@ export default function StudentDetailView({
       });
 
       console.log("Autorisation jury:", request);
+      if (request.success) {
+        const response = request.data;
+
+        if (response.length > 0) {
+          // Get the old note info for this element
+          const oldNote = notesInfo[elementId];
+
+          if (oldNote) {
+            // Compare each field with old values to detect changes
+            const changes: Record<
+              string,
+              { old: number; new: number; changed: boolean }
+            > = {
+              cmi: { old: oldNote.cmi, new: cmi, changed: oldNote.cmi !== cmi },
+              examen: {
+                old: oldNote.examen,
+                new: examen,
+                changed: oldNote.examen !== examen,
+              },
+              rattrapage: {
+                old: oldNote.rattrapage,
+                new: rattrapage,
+                changed: oldNote.rattrapage !== rattrapage,
+              },
+            };
+
+            // Log which values changed
+            Object.entries(changes).forEach(([field, value]) => {
+              if (value.changed) {
+                console.log(
+                  `${field} was modified from ${value.old} to ${value.new}`,
+                );
+              }
+            });
+          } else {
+            // This is a new note
+            console.log("Creating new note with values:", {
+              cmi,
+              examen,
+              rattrapage,
+            });
+          }
+        }
+      }
 
       // Mettre à jour les notes localement
       const totalPrincipal = cmi + examen;
