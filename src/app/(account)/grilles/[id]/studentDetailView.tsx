@@ -548,13 +548,25 @@ export default function StudentDetailView({
             };
 
             // Log which values changed
-            Object.entries(changes).forEach(([field, value]) => {
-              if (value.changed) {
-                console.log(
-                  `${field} was modified from ${value.old} to ${value.new}`,
-                );
-              }
-            });
+            Promise.all(
+              Object.entries(changes).map(async ([field, value]) => {
+                if (value.changed) {
+                  console.log(
+                    `${field} was modified from ${value.old} to ${value.new}`,
+                  );
+
+                  if (noteId !== null) {
+                    const changedNote = await titulaireApi.updateNoteCharge({
+                      cmdId: noteId,
+                      col: field,
+                      value: value.new,
+                    });
+
+                    console.log("Note modifiée avec succès:", changedNote);
+                  }
+                }
+              }),
+            );
           } else {
             // This is a new note
             console.log("Creating new note with values:", {
