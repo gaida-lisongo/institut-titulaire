@@ -154,7 +154,7 @@ class Titulaire {
     cmdId: number;
     col: string;
     value: any;
-  }): Promise<{ success: boolean; message?: string }> {
+  }): Promise<{ success: boolean; message?: string; data?: any }> {
     try {
       const response = await fetch(
         `${this.baseUrl}/titulaire/charge/${cmdId}`,

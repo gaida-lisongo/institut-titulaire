@@ -562,7 +562,46 @@ export default function StudentDetailView({
                       value: value.new,
                     });
 
-                    console.log("Note modifiée avec succès:", changedNote);
+                    if (changedNote.success) {
+                      const data = changedNote.data;
+
+                      if (data.affectedRows) {
+                        // Mettre à jour les notes localement
+                        const totalPrincipal = cmi + examen;
+                        const noteFinale = Math.max(totalPrincipal, rattrapage);
+
+                        setNotes((prev) => ({
+                          ...prev,
+                          [elementId]: noteFinale,
+                        }));
+
+                        setNotesInfo((prev) => ({
+                          ...prev,
+                          [elementId]: {
+                            id: noteId || Date.now(), // Utiliser l'ID existant ou générer un temporaire
+                            date_created:
+                              noteInfo?.date_created ||
+                              new Date().toISOString(),
+                            cmi,
+                            examen,
+                            rattrapage,
+                          },
+                        }));
+
+                        // Appeler ton API avec l'ID de la note
+                        if (noteId) {
+                          // Mise à jour d'une note existante
+                          console.log(`Mise à jour de la note ID: ${noteId}`);
+                          // await titulaireApi.updateNote({ noteId, cmi, examen, rattrapage, password });
+                        } else {
+                          // Création d'une nouvelle note
+                          console.log("Création d'une nouvelle note");
+                          // await titulaireApi.createNote({ elementId, studentId: student.id_etudiant, cmi, examen, rattrapage, password });
+                        }
+
+                        alert("Note sauvegardée avec succès");
+                      }
+                    }
                   }
                 }
               }),
@@ -577,39 +616,6 @@ export default function StudentDetailView({
           }
         }
       }
-
-      // Mettre à jour les notes localement
-      const totalPrincipal = cmi + examen;
-      const noteFinale = Math.max(totalPrincipal, rattrapage);
-
-      setNotes((prev) => ({
-        ...prev,
-        [elementId]: noteFinale,
-      }));
-
-      setNotesInfo((prev) => ({
-        ...prev,
-        [elementId]: {
-          id: noteId || Date.now(), // Utiliser l'ID existant ou générer un temporaire
-          date_created: noteInfo?.date_created || new Date().toISOString(),
-          cmi,
-          examen,
-          rattrapage,
-        },
-      }));
-
-      // Appeler ton API avec l'ID de la note
-      if (noteId) {
-        // Mise à jour d'une note existante
-        console.log(`Mise à jour de la note ID: ${noteId}`);
-        // await titulaireApi.updateNote({ noteId, cmi, examen, rattrapage, password });
-      } else {
-        // Création d'une nouvelle note
-        console.log("Création d'une nouvelle note");
-        // await titulaireApi.createNote({ elementId, studentId: student.id_etudiant, cmi, examen, rattrapage, password });
-      }
-
-      alert("Note sauvegardée avec succès");
     } catch (error) {
       console.error("Erreur lors de la sauvegarde:", error);
       alert("Erreur lors de la sauvegarde");
