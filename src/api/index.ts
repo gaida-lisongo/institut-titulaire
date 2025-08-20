@@ -1,6 +1,6 @@
 import Titulaire from "./Titulaire";
 import User from "./User";
 
-const userApi = new User("http://153.92.210.104:9001/api");
-const titulaireApi = new Titulaire("http://153.92.210.104:9001/api");
+const userApi = new User("https://institut.he-section.site/api");
+const titulaireApi = new Titulaire("https://institut.he-section.site/api");
 export { userApi, titulaireApi };
