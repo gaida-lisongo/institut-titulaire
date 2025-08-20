@@ -2,6 +2,7 @@
 import { titulaireApi } from '@/api';
 import { Student, Unite } from '@/types/jury';
 import React, { useState, useEffect } from 'react';
+import { useParams } from "next/navigation";
 
 type StudentDetailViewProps = {
   student: Student;
@@ -26,7 +27,13 @@ type EditNoteModalProps = {
     rattrapage: number;
   } | null;
   onClose: () => void;
-  onSave: (elementId: number, cmi: number, examen: number, rattrapage: number, password: string) => void;
+  onSave: (
+    elementId: number,
+    cmi: number,
+    examen: number,
+    rattrapage: number,
+    password: string,
+  ) => void;
 };
 
 // Modal pour éditer les notes
@@ -284,7 +291,7 @@ export default function StudentDetailView({
     } | null;
   }>({});
   const [loading, setLoading] = useState(true);
-
+  const id = useParams().id;
   // États pour la modal d'édition
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedElement, setSelectedElement] = useState<any>(null);
@@ -507,6 +514,13 @@ export default function StudentDetailView({
         password,
         studentId: student.id_etudiant,
       });
+
+      const request = await titulaireApi.checkAutorizationJury({
+        id: parseFloat(Array.isArray(id) ? id[0] : id || "0"),
+        code: password,
+      });
+
+      console.log("Autorisation jury:", request);
 
       // Mettre à jour les notes localement
       const totalPrincipal = cmi + examen;
