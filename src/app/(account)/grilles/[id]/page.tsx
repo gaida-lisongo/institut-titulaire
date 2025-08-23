@@ -2,7 +2,7 @@
 import { titulaireApi } from '@/api';
 import { Promotions, Semestre, Student, Unite } from '@/types/jury';
 import { useParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Students from './students';
 
 export default function Page() {
@@ -13,6 +13,7 @@ export default function Page() {
   const [jury, setJury] = useState<any>(null);
   const [selectedSemestre, setSelectedSemestre] = useState<Semestre | null>(null);
   const [showStudents, setShowStudents] = useState(false);
+  const [showDocumentsModal, setShowDocumentsModal] = useState(false);
 
   // Charger les données du jury
   const fetchData = async () => {
@@ -66,6 +67,13 @@ export default function Page() {
     setShowStudents(false);
   };
 
+  // Fonctions d'impression (à remplacer par vos vraies fonctions)
+  const handlePrint = (type: string) => {
+    setShowDocumentsModal(false);
+    // TODO: Remplacer par la logique d'impression réelle
+    alert(`Impression: ${type}`);
+  };
+
   useEffect(() => {
     // Récupérer les informations du jury depuis le localStorage
     const jurys = JSON.parse(localStorage.getItem("jurys") || "[]");
@@ -87,6 +95,55 @@ export default function Page() {
 
   return (
     <div className="container mx-auto py-6">
+      {/* Modal Documents */}
+      {showDocumentsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md relative">
+            <button
+              onClick={() => setShowDocumentsModal(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              aria-label="Fermer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Documents à imprimer</h3>
+            <div className="space-y-3">
+              <button
+                onClick={() => handlePrint('Palmarès')}
+                className="w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              >
+                Imprimer le palmarès
+              </button>
+              <button
+                onClick={() => handlePrint('Grille session principale')}
+                className="w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              >
+                Imprimer la grille session principale
+              </button>
+              <button
+                onClick={() => handlePrint('Grille rattrapage')}
+                className="w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              >
+                Imprimer la grille rattrapage
+              </button>
+              <button
+                onClick={() => handlePrint('Grille globale')}
+                className="w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              >
+                Imprimer la grille globale
+              </button>
+              <button
+                onClick={() => handlePrint('Recours')}
+                className="w-full px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              >
+                Imprimer les recours
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {!showStudents ? (
         // Vue des promotions et semestres
         <div className="space-y-8">
@@ -143,7 +200,17 @@ export default function Page() {
                             
                             {/* Boutons d'action */}
                             <div className="flex items-center space-x-3">
-                              {/* Bouton pour délibérer */}
+                              {/* Bouton Documents */}
+                              <button
+                                onClick={() => setShowDocumentsModal(true)}
+                                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                                </svg>
+                                Documents
+                              </button>
+                              {/* Bouton Délibérer */}
                               <button
                                 onClick={() => handleSemestreSelect(semestre, promotion.promotion)}
                                 className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -152,22 +219,6 @@ export default function Page() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                 </svg>
                                 Délibérer
-                              </button>
-                              
-                              {/* Bouton pour recours */}
-                              <button className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Recours
-                              </button>
-                              
-                              {/* Bouton pour palmarès */}
-                              <button className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                                </svg>
-                                Palmarès
                               </button>
                             </div>
                           </div>
